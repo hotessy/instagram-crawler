@@ -18,10 +18,10 @@ from .exceptions import RetryException
 from .fetch import fetch_caption
 from .fetch import fetch_comments
 from .fetch import fetch_datetime
+from .fetch import fetch_details
 from .fetch import fetch_imgs
 from .fetch import fetch_likers
 from .fetch import fetch_likes_plays
-from .fetch import fetch_details
 from .utils import instagram_int
 from .utils import randmized_sleep
 from .utils import retry
@@ -67,7 +67,7 @@ class InsCrawler(Logging):
         super(InsCrawler, self).__init__()
         self.browser = Browser(has_screen)
         self.page_height = 0
-        self.login()
+        # self.login()
 
     def _dismiss_login_prompt(self):
         ele_login = self.browser.find_one(".Ls00D .Szr5J")
