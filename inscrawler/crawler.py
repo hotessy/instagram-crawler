@@ -63,6 +63,7 @@ class Logging(object):
 class InsCrawler(Logging):
     URL = "https://www.instagram.com"
     RETRY_LIMIT = 10
+#     ctr=0
 
     def __init__(self, has_screen=False):
         super(InsCrawler, self).__init__()
@@ -81,7 +82,7 @@ class InsCrawler(Logging):
         browser.get(url)
         u_input = browser.find_one('input[name="username"]')
 #         print(secret.username)
-        u_input.send_keys(secret.username)
+        u_input.send_keys('scrapecovid_1')
         p_input = browser.find_one('input[name="password"]')
         p_input.send_keys(secret.password)
 
@@ -148,6 +149,7 @@ class InsCrawler(Logging):
 
     def get_latest_posts_by_tag(self, tag, num):
         url = "%s/explore/tags/%s/" % (InsCrawler.URL, tag)
+        print(url)
         self.browser.get(url)
         return self._get_posts(num)
     
@@ -166,7 +168,7 @@ class InsCrawler(Logging):
         print("Scraping from  ",url)
         print()
         self.browser.get(url)
-        return self._get_posts(num)
+        return self._get_posts(num,file=location_name+'.txt')
 
     def auto_like(self, tag="", maximum=1000):
         self.login()
@@ -272,7 +274,7 @@ class InsCrawler(Logging):
             posts.sort(key=lambda post: post["datetime"], reverse=True)
         return posts
 
-    def _get_posts(self, num):
+    def _get_posts(self, num,location=False,file='out.txt'):
         """
             To get posts, we have to click on the load more
             button and make the browser call post api.
@@ -285,8 +287,11 @@ class InsCrawler(Logging):
         wait_time = 1
 
         pbar = tqdm(total=num)
+        ctr=0
 
         def start_fetching(pre_post_num, wait_time):
+#             global ctr
+            nonlocal ctr
             ele_posts = browser.find(".v1Nh3 a")
             for ele in ele_posts:
                 key = ele.get_attribute("href")
@@ -294,12 +299,20 @@ class InsCrawler(Logging):
                     dict_post = { "key": key }
                     ele_img = browser.find_one(".KL4Bh img", ele)
                     dict_post["caption"] = ele_img.get_attribute("alt")
+                    print(dict_post["caption"])
                     dict_post["img_url"] = ele_img.get_attribute("src")
 
                     fetch_details(browser, dict_post)
 
                     key_set.add(key)
                     posts.append(dict_post)
+#                     global ctr
+                    ctr+=1
+#                     print(ctr)
+                    if(ctr%500==0):
+                        with open(file, "w") as output:
+                            output.write(str(posts))
+                    
 
                     if len(posts) == num:
                         break
